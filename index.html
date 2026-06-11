@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>当日スケジュール</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+  background: #f0f4f8;
+  min-height: 100vh;
+}
+header {
+  background: #1a3a5c;
+  color: white;
+  text-align: center;
+  padding: 20px 16px 16px;
+}
+header h1 { font-size: 1.2rem; font-weight: bold; margin-bottom: 4px; }
+header p { font-size: 0.8rem; opacity: 0.75; }
+
+.step { padding: 20px 16px; }
+.step-label { font-size: 0.8rem; color: #888; text-align: center; margin-bottom: 10px; letter-spacing: 0.05em; }
+.step h2 { font-size: 1rem; color: #333; text-align: center; margin-bottom: 14px; }
+
+.btn-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  max-width: 320px;
+  margin: 0 auto;
+}
+.btn-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  max-width: 360px;
+  margin: 0 auto;
+}
+.btn-grid-7 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.sel-btn {
+  background: white;
+  border: 2px solid #1a3a5c;
+  border-radius: 10px;
+  padding: 14px 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #1a3a5c;
+  cursor: pointer;
+  transition: all 0.12s;
+  text-align: center;
+}
+.sel-btn:active { background: #1a3a5c; color: white; }
+.sel-btn.active  { background: #1a3a5c; color: white; }
+
+.back-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px 0;
+}
+.back-btn {
+  background: none;
+  border: 1px solid #aaa;
+  color: #555;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.step-indicator {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+/* Timeline */
+.schedule-view { display: none; padding: 0 0 48px; }
+.schedule-view.visible { display: block; }
+.schedule-header {
+  background: #1a3a5c;
+  color: white;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.schedule-header .back-btn { border-color: rgba(255,255,255,0.5); color: white; }
+.schedule-header h2 { font-size: 1.05rem; }
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.75rem; color: #555; }
+.legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+.timeline { padding: 4px 16px 0; max-width: 480px; margin: 0 auto; }
+
+.row { display: flex; align-items: stretch; position: relative; }
+.time-col {
+  width: 68px;
+  flex-shrink: 0;
+  padding: 12px 8px 12px 0;
+  text-align: right;
+  font-size: 0.82rem;
+  color: #888;
+  font-variant-numeric: tabular-nums;
+}
+.line-col {
+  width: 30px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.dot {
+  width: 13px; height: 13px;
+  border-radius: 50%;
+  background: #1a3a5c;
+  margin-top: 14px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+.line { width: 2px; flex: 1; background: #c8d6e3; min-height: 16px; }
+.action-col { flex: 1; padding: 8px 0 8px 8px; }
+.action-card {
+  background: white;
+  border-radius: 10px;
+  padding: 10px 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.action-text { font-size: 1rem; font-weight: bold; color: #1a1a1a; line-height: 1.4; }
+.action-sub { font-size: 0.78rem; color: #888; margin-top: 2px; }
+
+.card-present .action-card { border-left: 4px solid #e74c3c; }
+.card-visit .action-card   { border-left: 4px solid #2980b9; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>当日スケジュール</h1>
+  <p>見学・発表の順番を確認できます</p>
+</header>
+
+<!-- Step 1: Group -->
+<div id="step1" class="step">
+  <div class="step-label">STEP 1 / 2</div>
+  <h2>自分のクラスグループを選択</h2>
+  <div class="btn-grid-2">
+    <button class="sel-btn" onclick="selectGroup('A1A')">A1A</button>
+    <button class="sel-btn" onclick="selectGroup('A1B')">A1B</button>
+    <button class="sel-btn" onclick="selectGroup('A1C')">A1C</button>
+    <button class="sel-btn" onclick="selectGroup('A1D')">A1D</button>
+  </div>
+</div>
+
+<!-- Step 2: Member -->
+<div id="step2" class="step" style="display:none">
+  <div class="back-row">
+    <button class="back-btn" onclick="goToStep1()">← 戻る</button>
+    <span class="step-indicator" id="step2label"></span>
+  </div>
+  <div style="height:14px"></div>
+  <div class="step-label">STEP 2 / 2</div>
+  <h2>自分の番号を選択</h2>
+  <div id="memberGrid" class="btn-grid-7"></div>
+</div>
+
+<!-- Schedule view -->
+<div class="schedule-view" id="scheduleView">
+  <div class="schedule-header">
+    <button class="back-btn" onclick="goToStep2()">← 戻る</button>
+    <h2 id="scheduleTitle"></h2>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#e74c3c"></div>発表</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#2980b9"></div>見学先ブース</div>
+  </div>
+  <div class="timeline" id="timeline"></div>
+</div>
+
+<script>
+const schedule = {"A1A":{"A":[{"time":"09:45","action":"発表"},{"time":"10:45","action":"B-A"},{"time":"10:55","action":"B-B"},{"time":"11:05","action":"B-C"},{"time":"11:15","action":"B-D"},{"time":"11:25","action":"B-E"},{"time":"11:35","action":"B-F"},{"time":"11:45","action":"B-G"},{"time":"13:00","action":"C-A"},{"time":"13:10","action":"C-B"},{"time":"13:20","action":"C-C"},{"time":"13:30","action":"C-D"},{"time":"13:40","action":"C-E"},{"time":"13:50","action":"C-F"},{"time":"14:10","action":"D-A"},{"time":"14:20","action":"D-B"},{"time":"14:30","action":"D-C"},{"time":"14:40","action":"D-D"},{"time":"14:50","action":"D-E"},{"time":"15:00","action":"D-F"}],"B":[{"time":"09:55","action":"発表"},{"time":"10:45","action":"B-B"},{"time":"10:55","action":"B-C"},{"time":"11:05","action":"B-D"},{"time":"11:15","action":"B-E"},{"time":"11:25","action":"B-F"},{"time":"11:35","action":"B-G"},{"time":"11:45","action":"B-A"},{"time":"13:00","action":"C-B"},{"time":"13:10","action":"C-C"},{"time":"13:20","action":"C-D"},{"time":"13:30","action":"C-E"},{"time":"13:40","action":"C-F"},{"time":"13:50","action":"C-A"},{"time":"14:10","action":"D-B"},{"time":"14:20","action":"D-C"},{"time":"14:30","action":"D-D"},{"time":"14:40","action":"D-E"},{"time":"14:50","action":"D-F"},{"time":"15:00","action":"D-A"}],"C":[{"time":"10:05","action":"発表"},{"time":"10:45","action":"B-C"},{"time":"10:55","action":"B-D"},{"time":"11:05","action":"B-E"},{"time":"11:15","action":"B-F"},{"time":"11:25","action":"B-G"},{"time":"11:35","action":"B-A"},{"time":"11:45","action":"B-B"},{"time":"13:00","action":"C-C"},{"time":"13:10","action":"C-D"},{"time":"13:20","action":"C-E"},{"time":"13:30","action":"C-F"},{"time":"13:40","action":"C-A"},{"time":"13:50","action":"C-B"},{"time":"14:10","action":"D-C"},{"time":"14:20","action":"D-D"},{"time":"14:30","action":"D-E"},{"time":"14:40","action":"D-F"},{"time":"14:50","action":"D-A"},{"time":"15:00","action":"D-B"}],"D":[{"time":"10:15","action":"発表"},{"time":"10:45","action":"B-D"},{"time":"10:55","action":"B-E"},{"time":"11:05","action":"B-F"},{"time":"11:15","action":"B-G"},{"time":"11:25","action":"B-A"},{"time":"11:35","action":"B-B"},{"time":"11:45","action":"B-C"},{"time":"13:00","action":"C-D"},{"time":"13:10","action":"C-E"},{"time":"13:20","action":"C-F"},{"time":"13:30","action":"C-A"},{"time":"13:40","action":"C-B"},{"time":"13:50","action":"C-C"},{"time":"14:10","action":"D-D"},{"time":"14:20","action":"D-E"},{"time":"14:30","action":"D-F"},{"time":"14:40","action":"D-A"},{"time":"14:50","action":"D-B"},{"time":"15:00","action":"D-C"}],"E":[{"time":"10:25","action":"発表"},{"time":"10:45","action":"B-E"},{"time":"10:55","action":"B-F"},{"time":"11:05","action":"B-G"},{"time":"11:15","action":"B-A"},{"time":"11:25","action":"B-B"},{"time":"11:35","action":"B-C"},{"time":"11:45","action":"B-D"},{"time":"13:00","action":"C-E"},{"time":"13:10","action":"C-F"},{"time":"13:20","action":"C-A"},{"time":"13:30","action":"C-B"},{"time":"13:40","action":"C-C"},{"time":"13:50","action":"C-B"},{"time":"14:10","action":"D-E"},{"time":"14:20","action":"D-F"},{"time":"14:30","action":"D-A"},{"time":"14:40","action":"D-B"},{"time":"14:50","action":"D-C"},{"time":"15:00","action":"D-D"}]},"A1B":{"A":[{"time":"09:45","action":"C-A"},{"time":"09:55","action":"C-B"},{"time":"10:05","action":"C-C"},{"time":"10:15","action":"C-D"},{"time":"10:25","action":"C-E"},{"time":"10:45","action":"発表"},{"time":"13:00","action":"D-A"},{"time":"13:10","action":"D-B"},{"time":"13:20","action":"D-C"},{"time":"13:30","action":"D-D"},{"time":"13:40","action":"D-E"},{"time":"13:50","action":"D-F"},{"time":"14:10","action":"C-F"},{"time":"14:20","action":"A-A"},{"time":"14:30","action":"A-B"},{"time":"14:40","action":"A-C"},{"time":"14:50","action":"A-D"},{"time":"15:00","action":"A-E"}],"B":[{"time":"09:45","action":"C-B"},{"time":"09:55","action":"C-C"},{"time":"10:05","action":"C-D"},{"time":"10:15","action":"C-E"},{"time":"10:25","action":"C-F"},{"time":"10:55","action":"発表"},{"time":"13:00","action":"D-B"},{"time":"13:10","action":"D-C"},{"time":"13:20","action":"D-D"},{"time":"13:30","action":"D-E"},{"time":"13:40","action":"D-F"},{"time":"13:50","action":"D-A"},{"time":"14:10","action":"C-A"},{"time":"14:20","action":"A-B"},{"time":"14:30","action":"A-C"},{"time":"14:40","action":"A-D"},{"time":"14:50","action":"A-E"},{"time":"15:00","action":"A-A"}],"C":[{"time":"09:45","action":"C-C"},{"time":"09:55","action":"C-D"},{"time":"10:05","action":"C-E"},{"time":"10:15","action":"C-F"},{"time":"10:25","action":"C-A"},{"time":"11:05","action":"発表"},{"time":"13:00","action":"D-C"},{"time":"13:10","action":"D-D"},{"time":"13:20","action":"D-E"},{"time":"13:30","action":"D-F"},{"time":"13:40","action":"D-A"},{"time":"13:50","action":"D-B"},{"time":"14:10","action":"C-B"},{"time":"14:20","action":"A-C"},{"time":"14:30","action":"A-D"},{"time":"14:40","action":"A-E"},{"time":"14:50","action":"A-A"},{"time":"15:00","action":"A-B"}],"D":[{"time":"09:45","action":"C-D"},{"time":"09:55","action":"C-E"},{"time":"10:05","action":"C-F"},{"time":"10:15","action":"C-A"},{"time":"10:25","action":"C-B"},{"time":"11:15","action":"発表"},{"time":"13:00","action":"D-D"},{"time":"13:10","action":"D-E"},{"time":"13:20","action":"D-F"},{"time":"13:30","action":"D-A"},{"time":"13:40","action":"D-B"},{"time":"13:50","action":"D-C"},{"time":"14:10","action":"C-C"},{"time":"14:20","action":"A-D"},{"time":"14:30","action":"A-E"},{"time":"14:40","action":"A-A"},{"time":"14:50","action":"A-B"},{"time":"15:00","action":"A-C"}],"E":[{"time":"09:45","action":"C-E"},{"time":"09:55","action":"C-F"},{"time":"10:05","action":"C-A"},{"time":"10:15","action":"C-B"},{"time":"10:25","action":"C-C"},{"time":"11:25","action":"発表"},{"time":"13:00","action":"D-E"},{"time":"13:10","action":"D-F"},{"time":"13:20","action":"D-A"},{"time":"13:30","action":"D-B"},{"time":"13:40","action":"D-C"},{"time":"13:50","action":"D-D"},{"time":"14:10","action":"C-D"},{"time":"14:20","action":"A-E"},{"time":"14:30","action":"A-A"},{"time":"14:40","action":"A-B"},{"time":"14:50","action":"A-C"},{"time":"15:00","action":"A-D"}],"F":[{"time":"09:45","action":"A-D"},{"time":"09:55","action":"A-E"},{"time":"10:05","action":"A-A"},{"time":"10:15","action":"A-B"},{"time":"10:25","action":"A-C"},{"time":"11:35","action":"発表"},{"time":"13:00","action":"D-F"},{"time":"13:10","action":"D-A"},{"time":"13:20","action":"D-B"},{"time":"13:30","action":"D-C"},{"time":"13:40","action":"D-D"},{"time":"13:50","action":"D-E"},{"time":"14:10","action":"C-E"},{"time":"14:20","action":"C-F"},{"time":"14:30","action":"C-A"},{"time":"14:40","action":"C-B"},{"time":"14:50","action":"C-C"},{"time":"15:00","action":"C-D"}],"G":[{"time":"09:45","action":"A-A"},{"time":"09:55","action":"A-B"},{"time":"10:05","action":"A-C"},{"time":"10:15","action":"A-D"},{"time":"10:25","action":"A-E"},{"time":"11:45","action":"発表"},{"time":"13:00","action":"C-F"},{"time":"13:10","action":"C-A"},{"time":"13:20","action":"C-B"},{"time":"13:30","action":"C-C"},{"time":"13:40","action":"C-D"},{"time":"13:50","action":"C-E"},{"time":"14:10","action":"D-F"},{"time":"14:20","action":"D-A"},{"time":"14:30","action":"D-B"},{"time":"14:40","action":"D-C"},{"time":"14:50","action":"D-D"},{"time":"15:00","action":"D-E"}]},"A1C":{"A":[{"time":"09:45","action":"D-A"},{"time":"09:55","action":"D-B"},{"time":"10:05","action":"D-C"},{"time":"10:15","action":"D-D"},{"time":"10:25","action":"D-E"},{"time":"10:45","action":"D-F"},{"time":"10:55","action":"B-A"},{"time":"11:05","action":"A-A"},{"time":"11:15","action":"A-B"},{"time":"11:25","action":"A-C"},{"time":"11:35","action":"A-D"},{"time":"11:45","action":"A-E"},{"time":"13:00","action":"発表"},{"time":"14:10","action":"B-B"},{"time":"14:20","action":"B-C"},{"time":"14:30","action":"B-D"},{"time":"14:40","action":"B-E"},{"time":"14:50","action":"B-F"},{"time":"15:00","action":"B-G"}],"B":[{"time":"09:45","action":"D-B"},{"time":"09:55","action":"D-C"},{"time":"10:05","action":"D-D"},{"time":"10:15","action":"D-E"},{"time":"10:25","action":"D-F"},{"time":"10:45","action":"D-A"},{"time":"10:55","action":"A-E"},{"time":"11:05","action":"B-B"},{"time":"11:15","action":"A-A"},{"time":"11:25","action":"A-B"},{"time":"11:35","action":"A-C"},{"time":"11:45","action":"A-D"},{"time":"13:10","action":"発表"},{"time":"14:10","action":"B-C"},{"time":"14:20","action":"B-D"},{"time":"14:30","action":"B-E"},{"time":"14:40","action":"B-F"},{"time":"14:50","action":"B-G"},{"time":"15:00","action":"B-A"}],"C":[{"time":"09:45","action":"D-C"},{"time":"09:55","action":"D-D"},{"time":"10:05","action":"D-E"},{"time":"10:15","action":"D-F"},{"time":"10:25","action":"D-A"},{"time":"10:45","action":"D-B"},{"time":"10:55","action":"A-D"},{"time":"11:05","action":"A-E"},{"time":"11:15","action":"B-C"},{"time":"11:25","action":"A-A"},{"time":"11:35","action":"A-B"},{"time":"11:45","action":"A-C"},{"time":"13:20","action":"発表"},{"time":"14:10","action":"B-D"},{"time":"14:20","action":"B-E"},{"time":"14:30","action":"B-F"},{"time":"14:40","action":"B-G"},{"time":"14:50","action":"B-A"},{"time":"15:00","action":"B-B"}],"D":[{"time":"09:45","action":"D-D"},{"time":"09:55","action":"D-E"},{"time":"10:05","action":"D-F"},{"time":"10:15","action":"D-A"},{"time":"10:25","action":"D-B"},{"time":"10:45","action":"D-C"},{"time":"10:55","action":"A-C"},{"time":"11:05","action":"A-D"},{"time":"11:15","action":"A-E"},{"time":"11:25","action":"B-D"},{"time":"11:35","action":"A-A"},{"time":"11:45","action":"A-B"},{"time":"13:30","action":"発表"},{"time":"14:10","action":"B-E"},{"time":"14:20","action":"B-F"},{"time":"14:30","action":"B-G"},{"time":"14:40","action":"B-A"},{"time":"14:50","action":"B-B"},{"time":"15:00","action":"B-C"}],"E":[{"time":"09:45","action":"D-E"},{"time":"09:55","action":"D-F"},{"time":"10:05","action":"D-A"},{"time":"10:15","action":"D-B"},{"time":"10:25","action":"D-C"},{"time":"10:45","action":"D-D"},{"time":"10:55","action":"A-B"},{"time":"11:05","action":"A-C"},{"time":"11:15","action":"A-D"},{"time":"11:25","action":"A-E"},{"time":"11:35","action":"B-E"},{"time":"11:45","action":"A-A"},{"time":"13:40","action":"発表"},{"time":"14:10","action":"B-F"},{"time":"14:20","action":"B-G"},{"time":"14:30","action":"B-A"},{"time":"14:40","action":"B-B"},{"time":"14:50","action":"B-C"},{"time":"15:00","action":"B-D"}],"F":[{"time":"09:45","action":"A-E"},{"time":"09:55","action":"A-A"},{"time":"10:05","action":"A-B"},{"time":"10:15","action":"A-C"},{"time":"10:25","action":"A-D"},{"time":"10:45","action":"D-E"},{"time":"10:55","action":"D-D"},{"time":"11:05","action":"D-C"},{"time":"11:15","action":"D-B"},{"time":"11:25","action":"D-A"},{"time":"11:35","action":"D-F"},{"time":"11:45","action":"B-F"},{"time":"13:50","action":"発表"},{"time":"14:10","action":"B-G"},{"time":"14:20","action":"B-A"},{"time":"14:30","action":"B-B"},{"time":"14:40","action":"B-C"},{"time":"14:50","action":"B-D"},{"time":"15:00","action":"B-E"}]},"A1D":{"A":[{"time":"09:45","action":"B-A"},{"time":"09:55","action":"B-B"},{"time":"10:05","action":"B-C"},{"time":"10:15","action":"B-D"},{"time":"10:25","action":"B-E"},{"time":"10:45","action":"B-F"},{"time":"10:55","action":"C-A"},{"time":"11:05","action":"C-B"},{"time":"11:15","action":"C-C"},{"time":"11:25","action":"C-D"},{"time":"11:35","action":"C-E"},{"time":"11:45","action":"C-F"},{"time":"13:00","action":"B-G"},{"time":"13:10","action":"A-A"},{"time":"13:20","action":"A-B"},{"time":"13:30","action":"A-C"},{"time":"13:40","action":"A-D"},{"time":"13:50","action":"A-E"},{"time":"14:10","action":"発表"}],"B":[{"time":"09:45","action":"B-B"},{"time":"09:55","action":"B-C"},{"time":"10:05","action":"B-D"},{"time":"10:15","action":"B-E"},{"time":"10:25","action":"B-F"},{"time":"10:45","action":"C-B"},{"time":"10:55","action":"B-G"},{"time":"11:05","action":"C-A"},{"time":"11:15","action":"C-B"},{"time":"11:25","action":"C-C"},{"time":"11:35","action":"C-D"},{"time":"11:45","action":"C-E"},{"time":"13:00","action":"B-A"},{"time":"13:10","action":"A-B"},{"time":"13:20","action":"A-C"},{"time":"13:30","action":"A-D"},{"time":"13:40","action":"A-E"},{"time":"13:50","action":"A-A"},{"time":"14:20","action":"発表"}],"C":[{"time":"09:45","action":"B-C"},{"time":"09:55","action":"B-D"},{"time":"10:05","action":"B-E"},{"time":"10:15","action":"B-F"},{"time":"10:25","action":"B-G"},{"time":"10:45","action":"C-E"},{"time":"10:55","action":"C-F"},{"time":"11:05","action":"B-A"},{"time":"11:15","action":"C-A"},{"time":"11:25","action":"C-B"},{"time":"11:35","action":"C-C"},{"time":"11:45","action":"C-D"},{"time":"13:00","action":"B-B"},{"time":"13:10","action":"A-C"},{"time":"13:20","action":"A-D"},{"time":"13:30","action":"A-E"},{"time":"13:40","action":"A-A"},{"time":"13:50","action":"A-B"},{"time":"14:30","action":"発表"}],"D":[{"time":"09:45","action":"B-D"},{"time":"09:55","action":"B-E"},{"time":"10:05","action":"B-F"},{"time":"10:15","action":"B-G"},{"time":"10:25","action":"B-A"},{"time":"10:45","action":"C-D"},{"time":"10:55","action":"C-E"},{"time":"11:05","action":"C-F"},{"time":"11:15","action":"B-B"},{"time":"11:25","action":"C-A"},{"time":"11:35","action":"C-B"},{"time":"11:45","action":"C-C"},{"time":"13:00","action":"B-C"},{"time":"13:10","action":"A-D"},{"time":"13:20","action":"A-E"},{"time":"13:30","action":"A-A"},{"time":"13:40","action":"A-B"},{"time":"13:50","action":"A-C"},{"time":"14:40","action":"発表"}],"E":[{"time":"09:45","action":"B-E"},{"time":"09:55","action":"B-F"},{"time":"10:05","action":"B-G"},{"time":"10:15","action":"B-A"},{"time":"10:25","action":"B-B"},{"time":"10:45","action":"C-C"},{"time":"10:55","action":"C-D"},{"time":"11:05","action":"C-E"},{"time":"11:15","action":"C-F"},{"time":"11:25","action":"B-C"},{"time":"11:35","action":"C-A"},{"time":"11:45","action":"C-B"},{"time":"13:00","action":"B-D"},{"time":"13:10","action":"A-E"},{"time":"13:20","action":"A-A"},{"time":"13:30","action":"A-B"},{"time":"13:40","action":"A-C"},{"time":"13:50","action":"A-D"},{"time":"14:50","action":"発表"}],"F":[{"time":"09:45","action":"A-B"},{"time":"09:55","action":"A-C"},{"time":"10:05","action":"A-D"},{"time":"10:15","action":"A-E"},{"time":"10:25","action":"A-A"},{"time":"10:45","action":"C-B"},{"time":"10:55","action":"C-C"},{"time":"11:05","action":"C-D"},{"time":"11:15","action":"C-E"},{"time":"11:25","action":"C-F"},{"time":"11:35","action":"B-D"},{"time":"11:45","action":"C-A"},{"time":"13:00","action":"B-E"},{"time":"13:10","action":"B-F"},{"time":"13:20","action":"B-G"},{"time":"13:30","action":"B-A"},{"time":"13:40","action":"B-B"},{"time":"13:50","action":"B-C"},{"time":"15:00","action":"発表"}]}};
+
+let currentGroup = null;
+
+function selectGroup(group) {
+  currentGroup = group;
+  document.getElementById('step1').style.display = 'none';
+  document.getElementById('step2').style.display = 'block';
+  document.getElementById('step2label').textContent = group + ' を選択中';
+
+  const members = Object.keys(schedule[group]);
+  const grid = document.getElementById('memberGrid');
+  grid.innerHTML = '';
+  members.forEach(m => {
+    const btn = document.createElement('button');
+    btn.className = 'sel-btn';
+    btn.textContent = m;
+    btn.onclick = () => showSchedule(group, m);
+    grid.appendChild(btn);
+  });
+}
+
+function goToStep1() {
+  document.getElementById('step2').style.display = 'none';
+  document.getElementById('step1').style.display = 'block';
+  document.getElementById('scheduleView').classList.remove('visible');
+}
+
+function goToStep2() {
+  document.getElementById('scheduleView').classList.remove('visible');
+  document.getElementById('step2').style.display = 'block';
+  window.scrollTo(0, 0);
+}
+
+function showSchedule(group, member) {
+  document.getElementById('step2').style.display = 'none';
+  const view = document.getElementById('scheduleView');
+  view.classList.add('visible');
+  document.getElementById('scheduleTitle').textContent = group + '－' + member + ' のスケジュール';
+
+  const items = schedule[group][member];
+  const timeline = document.getElementById('timeline');
+  timeline.innerHTML = '';
+
+  items.forEach((item, i) => {
+    const isLast = i === items.length - 1;
+    const isPresent = item.action === '発表';
+    const cardClass = isPresent ? 'card-present' : 'card-visit';
+    const label = isPresent ? '📢 発表（自分のブース）' : '👀 見学先：' + item.action;
+
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML = `
+      <div class="time-col">${item.time}</div>
+      <div class="line-col">
+        <div class="dot"></div>
+        ${!isLast ? '<div class="line"></div>' : ''}
+      </div>
+      <div class="action-col ${cardClass}">
+        <div class="action-card">
+          <div class="action-text">${label}</div>
+        </div>
+      </div>
+    `;
+    timeline.appendChild(row);
+  });
+
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>
