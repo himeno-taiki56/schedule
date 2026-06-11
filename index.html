@@ -159,7 +159,7 @@ header p { font-size: 0.8rem; opacity: 0.75; }
 <!-- Step 1: Group -->
 <div id="step1" class="step">
   <div class="step-label">STEP 1 / 2</div>
-  <h2>自分のクラスグループを選択</h2>
+  <h2>自分のクラスを選択</h2>
   <div class="btn-grid-2">
     <button class="sel-btn" onclick="selectGroup('A1A')">A1A</button>
     <button class="sel-btn" onclick="selectGroup('A1B')">A1B</button>
@@ -176,7 +176,7 @@ header p { font-size: 0.8rem; opacity: 0.75; }
   </div>
   <div style="height:14px"></div>
   <div class="step-label">STEP 2 / 2</div>
-  <h2>自分の番号を選択</h2>
+  <h2>自分のグループを選択</h2>
   <div id="memberGrid" class="btn-grid-7"></div>
 </div>
 
@@ -242,7 +242,7 @@ function showSchedule(group, member) {
     const isLast = i === items.length - 1;
     const isPresent = item.action === '発表';
     const cardClass = isPresent ? 'card-present' : 'card-visit';
-    const label = isPresent ? '📢 発表（自分のブース）' : '👀 見学先：' + item.action;
+    const label = isPresent ? '📢 発表（プレゼン会場）' : '👀 見学先：' + item.action;
 
     const row = document.createElement('div');
     row.className = 'row';
