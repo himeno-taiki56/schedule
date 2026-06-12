@@ -242,7 +242,7 @@ function showSchedule(group, member) {
     const isLast = i === items.length - 1;
     const isPresent = item.action === '発表';
     const cardClass = isPresent ? 'card-present' : 'card-visit';
-    const label = isPresent ? '📢 発表（プレゼン会場）' : '👀 見学先：' + item.action;
+    const label = isPresent ? '📢 発表もしくは発表準備（プレゼン会場へ）' : '👀 見学先：' + item.action;
 
     const row = document.createElement('div');
     row.className = 'row';
